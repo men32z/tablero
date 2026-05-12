@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { BookOpen, Folder, Folders, LayoutGrid, Menu, Search } from 'lucide-vue-next';
+import { computed, type ComputedRef } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
+import { useLocale } from '@/composables/useLocale';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -49,30 +50,38 @@ const props = withDefaults(defineProps<Props>(), {
 const page = usePage();
 const auth = computed(() => page.props.auth);
 const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
+const { localeLabel, t, toggleLocale } = useLocale();
 
 const activeItemStyles =
     'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100';
 
-const mainNavItems: NavItem[] = [
+const projectsAnchor = `${dashboard().url}#my-projects`;
+
+const mainNavItems: ComputedRef<NavItem[]> = computed(() => [
     {
-        title: 'Dashboard',
+        title: t('nav.dashboard'),
         href: dashboard(),
         icon: LayoutGrid,
     },
-];
-
-const rightNavItems: NavItem[] = [
     {
-        title: 'Repository',
+        title: t('nav.myProjects'),
+        href: projectsAnchor,
+        icon: Folders,
+    },
+]);
+
+const rightNavItems: ComputedRef<NavItem[]> = computed(() => [
+    {
+        title: t('nav.repository'),
         href: 'https://github.com/laravel/vue-starter-kit',
         icon: Folder,
     },
     {
-        title: 'Documentation',
+        title: t('nav.documentation'),
         href: 'https://laravel.com/docs/starter-kits#vue',
         icon: BookOpen,
     },
-];
+]);
 </script>
 
 <template>
@@ -93,7 +102,7 @@ const rightNavItems: NavItem[] = [
                         </SheetTrigger>
                         <SheetContent side="left" class="w-[300px] p-6">
                             <SheetTitle class="sr-only"
-                                >Navigation menu</SheetTitle
+                                >{{ t('nav.navigationMenu') }}</SheetTitle
                             >
                             <SheetHeader class="flex justify-start text-left">
                                 <AppLogoIcon
@@ -194,6 +203,7 @@ const rightNavItems: NavItem[] = [
                             variant="ghost"
                             size="icon"
                             class="group h-9 w-9 cursor-pointer"
+                            :aria-label="t('nav.search')"
                         >
                             <Search
                                 class="size-5 opacity-80 group-hover:opacity-100"
@@ -237,6 +247,17 @@ const rightNavItems: NavItem[] = [
                             </template>
                         </div>
                     </div>
+
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        class="h-8 px-2 text-xs font-semibold"
+                        :aria-label="t('nav.toggleLanguage')"
+                        @click="toggleLocale"
+                    >
+                        {{ localeLabel }}
+                    </Button>
 
                     <DropdownMenu>
                         <DropdownMenuTrigger :as-child="true">
